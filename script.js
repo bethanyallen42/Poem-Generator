@@ -28,43 +28,71 @@ function markovChain(arr) {
 }
 
 function writeLine(obj, n) {
-  let keysList = Object.keys(obj);
+  let word = randomStartWord(obj);
+  let poetryLine = word;
+  let count = 1;
 
-  let poetryLineArr = [];
+  let key = obj[word];
 
-  while (poetryLineArr.length < n) {
-    let randomKeyName = keysList[random(keysList.length)];
-    let randomKey = obj[randomKeyName];
-
-    if (randomKey.length === 1) {
-      poetryLineArr.push(randomKeyName);
-      if (poetryLineArr.length === n) {
-        break;
-      }
-      poetryLineArr.push(randomKey[0]);
-    } else if (randomKey.length > 1) {
-      poetryLineArr.push(randomKeyName);
-      if (poetryLineArr.length === n) {
-        break;
-      }
-      poetryLineArr.push(randomKey[random(randomKey.length)]);
+  while (count < n) {
+    if (key.length === 1) {
+      poetryLine += " " + key;
+      let index = Math.floor(Math.random() * key.length);
+      word = key[index];
+      key = obj[word];
+      count++;
+    } else if (key.length > 1) {
+      let index = Math.floor(Math.random() * key.length);
+      word = key[index];
+      poetryLine += " " + word;
+      key = obj[word];
+      count++;
+    } else {
+      word = randomStartWord(obj);
+      key = obj[word];
     }
   }
-  return poetryLineArr.join(" ");
+  return poetryLine;
 }
 
-function random(num) {
-  return Math.floor(Math.random() * num);
+function randomStartWord(obj) {
+  let keysList = Object.keys(obj);
+  let idx = Math.floor(Math.random() * keysList.length);
+  return keysList[idx];
 }
 
 function generatePoem(wordCorpus, num) {
   let wordPairs = generateWordPairs(wordCorpus);
   let poem = "";
+
   for (let i = 0; i < num; i++) {
     poem += writeLine(wordPairs, Math.floor(Math.random() * 10) + 1);
-    poem += "\n";
+    poem += "<br>";
   }
-
-  console.log(poem);
   return poem;
 }
+
+document.getElementById("poemCard").style.display = "none";
+
+document.getElementById("submitBtn").onclick = function (e) {
+  e.preventDefault();
+  const text = document.getElementById("submittedCorpus").value;
+  const lines = Number(document.getElementById("numOfLines").value);
+
+  console.log(typeof lines);
+  document.getElementById("generatedPoem").innerHTML = generatePoem(
+    text,
+    lines
+  );
+
+  document.getElementById("questionCard").style.display = "none";
+  document.getElementById("poemCard").style.display = "flex";
+  window.scrollTo(0, 0);
+};
+
+document.getElementById("playAgain").onclick = function () {
+  document.getElementById("poemCard").style.display = "none";
+  document.getElementById("questionCard").style.display = "flex";
+  document.getElementById("submissionForm").reset();
+  window.scrollTo(0, 0);
+};
