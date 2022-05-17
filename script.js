@@ -1,23 +1,23 @@
-function generateWordPairs(string) {
-  let wordArr = string
+function parseText(string) {
+  return string
     .replace(/[.,\/#!?$%\^&\*;:{}=\-_`~()]/g, "")
     .replace(/\s{2,}/g, " ")
     .toLowerCase()
     .split(" ");
-  return markovChain(wordArr);
 }
 
 function markovChain(arr) {
   const dictionary = {};
 
   arr.forEach((item, index, arr) => {
+    let nextWord = arr[index + 1];
     if (dictionary[item]) {
-      if (arr[index + 1]) {
-        dictionary[item].push(arr[index + 1]);
+      if (nextWord) {
+        dictionary[item].push(nextWord);
       }
     } else {
-      if (arr[index + 1]) {
-        dictionary[item] = [arr[index + 1]];
+      if (nextWord) {
+        dictionary[item] = [nextWord];
       } else {
         dictionary[item] = [];
       }
@@ -27,48 +27,52 @@ function markovChain(arr) {
   return dictionary;
 }
 
+function generateWordPairs(string) {
+  return markovChain(parseText(string));
+}
+
+function randomWord(arr) {
+  let word = arr[Math.floor(Math.random() * arr.length)];
+  return word;
+}
+
 function writeLine(obj, n) {
-  let word = randomStartWord(obj);
+  let word = randomWord(Object.keys(obj));
   let poetryLine = word;
+  let nextChoice = obj[word];
+
   let count = 1;
 
-  let key = obj[word];
-
   while (count < n) {
-    if (key.length === 1) {
-      poetryLine += " " + key;
-      let index = Math.floor(Math.random() * key.length);
-      word = key[index];
-      key = obj[word];
-      count++;
-    } else if (key.length > 1) {
-      let index = Math.floor(Math.random() * key.length);
-      word = key[index];
+    if (nextChoice.length >= 1) {
+      word = randomWord(nextChoice);
       poetryLine += " " + word;
-      key = obj[word];
+      nextChoice = obj[word];
       count++;
     } else {
-      word = randomStartWord(obj);
-      key = obj[word];
+      word = randomWord(keysList);
+      nextChoice = obj[word];
     }
   }
   return poetryLine;
 }
 
-function randomStartWord(obj) {
-  let keysList = Object.keys(obj);
-  let idx = Math.floor(Math.random() * keysList.length);
-  return keysList[idx];
-}
-
 function generatePoem(wordCorpus, num) {
   let wordPairs = generateWordPairs(wordCorpus);
-  let poem = "";
+  let poem = [];
 
   for (let i = 0; i < num; i++) {
-    poem += writeLine(wordPairs, Math.floor(Math.random() * 10) + 1);
-    poem += "<br>";
+    poem.push(writeLine(wordPairs, Math.floor(Math.random() * 10) + 1));
   }
+
+  return poem;
+}
+
+function format(arr) {
+  let poem = "";
+  arr.forEach((item) => {
+    poem += item + "<br>";
+  });
   return poem;
 }
 
@@ -79,10 +83,8 @@ document.getElementById("submitBtn").onclick = function (e) {
   const text = document.getElementById("submittedCorpus").value;
   const lines = Number(document.getElementById("numOfLines").value);
 
-  console.log(typeof lines);
-  document.getElementById("generatedPoem").innerHTML = generatePoem(
-    text,
-    lines
+  document.getElementById("generatedPoem").innerHTML = format(
+    generatePoem(text, lines)
   );
 
   document.getElementById("questionCard").style.display = "none";
