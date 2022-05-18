@@ -37,7 +37,8 @@ function randomWord(arr) {
 }
 
 function writeLine(obj, n) {
-  let word = randomWord(Object.keys(obj));
+  let keysArray = Object.keys(obj);
+  let word = randomWord(keysArray);
   let poetryLine = word;
   let nextChoice = obj[word];
 
@@ -50,7 +51,7 @@ function writeLine(obj, n) {
       nextChoice = obj[word];
       count++;
     } else {
-      word = randomWord(keysList);
+      word = randomWord(keysArray);
       nextChoice = obj[word];
     }
   }
